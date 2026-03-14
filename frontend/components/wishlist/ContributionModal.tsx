@@ -1,10 +1,8 @@
 "use client";
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
 import api, { Item } from "@/lib/api";
-import Modal from "@/components/ui/Modal";
-import Input from "@/components/ui/Input";
-import Button from "@/components/ui/Button";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { formatPrice, getApiError } from "@/lib/utils";
 
@@ -15,6 +13,8 @@ interface ContributionModalProps {
   guestName: string;
   onSaved: () => void;
 }
+
+const QUICK_AMOUNTS = [500, 1000, 2000, 5000];
 
 export default function ContributionModal({ open, onClose, item, guestName, onSaved }: ContributionModalProps) {
   const [amount, setAmount] = useState("");
@@ -49,44 +49,104 @@ export default function ContributionModal({ open, onClose, item, guestName, onSa
   const target = item.target_amount ?? 0;
 
   return (
-    <Modal open={open} onClose={onClose} title="Скинуться на подарок">
-      <div className="flex flex-col gap-5">
-        <div className="bg-surface-2 rounded-xl p-4">
-          <p className="font-medium text-text-primary mb-1">{item.title}</p>
-          {target > 0 && <ProgressBar current={current} target={target} />}
-          {target > 0 && (
-            <p className="text-xs text-text-muted mt-2">
-              Уже собрано: {formatPrice(current)} из {formatPrice(target)}
-            </p>
-          )}
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input
-            label="Ваша сумма, ₽"
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="500"
-            min={1}
-            required
+    <AnimatePresence>
+      {open && (
+        <div className="modal-root">
+          <motion.div
+            className="modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
           />
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-text-muted">Заметка (необязательно)</label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="С наилучшими пожеланиями!"
-              rows={2}
-              className="w-full px-3 py-2.5 rounded-xl bg-surface border border-border text-text-primary placeholder:text-text-subtle focus:border-accent outline-none transition-all resize-none"
-            />
-          </div>
-          <div className="flex gap-3">
-            <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>Отмена</Button>
-            <Button type="submit" loading={loading} className="flex-1">Внести вклад</Button>
-          </div>
-        </form>
-      </div>
-    </Modal>
+          <motion.div
+            className="contrib-panel"
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
+            transition={{ type: "spring", damping: 28, stiffness: 320 }}
+          >
+            {/* Header */}
+            <div className="contrib-header">
+              <div className="contrib-header-left">
+                <span className="contrib-header-icon">🎁</span>
+                <span className="contrib-header-title">Скинуться на подарок</span>
+              </div>
+              <button className="modal-close" onClick={onClose}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="contrib-body">
+              {/* Item card */}
+              <div className="contrib-item-card">
+                <p className="contrib-item-title">{item.title}</p>
+                {target > 0 && (
+                  <>
+                    <ProgressBar current={current} target={target} />
+                    <p className="contrib-progress-label">
+                      Уже собрано: <span>{formatPrice(current)}</span> из {formatPrice(target)}
+                    </p>
+                  </>
+                )}
+              </div>
+
+              {/* Amount */}
+              <div className="contrib-section">
+                <p className="contrib-label">Ваша сумма, ₽</p>
+                <div className="contrib-chips">
+                  {QUICK_AMOUNTS.map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      className={`contrib-chip${amount === String(v) ? " contrib-chip--active" : ""}`}
+                      onClick={() => setAmount(String(v))}
+                    >
+                      {v.toLocaleString("ru-RU")} ₽
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="Или введите свою сумму"
+                  min={1}
+                  required
+                  className="contrib-input"
+                />
+              </div>
+
+              {/* Note */}
+              <div className="contrib-section">
+                <p className="contrib-label">
+                  Заметка <span className="contrib-label-optional">— необязательно</span>
+                </p>
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="С наилучшими пожеланиями!"
+                  rows={2}
+                  className="contrib-textarea"
+                />
+              </div>
+
+              {/* Footer */}
+              <div className="contrib-footer">
+                <button type="button" className="contrib-btn-cancel" onClick={onClose}>
+                  Отмена
+                </button>
+                <button type="submit" className="contrib-btn-submit" disabled={loading}>
+                  {loading && <span className="contrib-spinner" />}
+                  Внести вклад
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }

@@ -72,8 +72,8 @@ async def wishlist_stats(wishlist_id: str, current_user: User = Depends(get_curr
 
     return WishlistStats(
         total_items=len(items),
-        available=sum(1 for i in items if i.status == "available"),
-        reserved=sum(1 for i in items if i.status == "reserved"),
+        available=sum(1 for i in items if i.status in ("available", "reserved")),
+        reserved=0,  # reservations are hidden from the owner
         collecting=sum(1 for i in items if i.status == "collecting"),
         collected=sum(1 for i in items if i.status == "collected"),
         total_collected_amount=total_collected,

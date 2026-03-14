@@ -3,7 +3,6 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import api, { Item } from "@/lib/api";
 import { getApiError } from "@/lib/utils";
-import Button from "@/components/ui/Button";
 
 interface ReserveButtonProps {
   item: Item;
@@ -28,10 +27,10 @@ export default function ReserveButton({ item, guestName, onRefresh, requireName 
       const payload = { reserver_name: guestName, reserver_token: myToken || undefined };
       const { data } = await api.post<{ reserver_token: string }>(`/items/${item.id}/reserve`, payload);
       localStorage.setItem(storageKey, data.reserver_token);
-      toast.success("Зарезервировано!");
+      toast.success("Подарок забронирован!");
       onRefresh();
     } catch (err: unknown) {
-      toast.error(getApiError(err, "Уже зарезервировано"));
+      toast.error(getApiError(err, "Уже забронировано"));
     } finally {
       setLoading(false);
     }
@@ -43,7 +42,7 @@ export default function ReserveButton({ item, guestName, onRefresh, requireName 
     try {
       await api.delete(`/items/${item.id}/reserve`, { data: { reserver_token: myToken } });
       localStorage.removeItem(storageKey);
-      toast.success("Резерв отменён");
+      toast.success("Бронь отменена");
       onRefresh();
     } catch {
       toast.error("Ошибка");
@@ -57,23 +56,25 @@ export default function ReserveButton({ item, guestName, onRefresh, requireName 
 
   if (isMyReservation) {
     return (
-      <Button variant="danger" size="sm" loading={loading} onClick={handleCancel}>
-        Отменить резерв
-      </Button>
+      <button className="icard-btn-reserve-cancel" disabled={loading} onClick={handleCancel}>
+        {loading && <span className="icard-reserve-spinner" />}
+        Отменить бронь
+      </button>
     );
   }
 
   if (item.status === "reserved") {
     return (
-      <span className="text-xs text-text-muted px-3 py-1.5 border border-border rounded-xl">
-        Уже зарезервировано
+      <span className="icard-btn-reserved-badge">
+        🔒 Уже забронировано
       </span>
     );
   }
 
   return (
-    <Button size="sm" loading={loading} onClick={handleReserve}>
-      Зарезервировать
-    </Button>
+    <button className="icard-btn-reserve" disabled={loading} onClick={handleReserve}>
+      {loading && <span className="icard-reserve-spinner" />}
+      🎁 Забронировать
+    </button>
   );
 }

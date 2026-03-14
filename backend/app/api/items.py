@@ -48,7 +48,14 @@ async def list_items(
         .order_by(Item.order_index, Item.created_at)
     )
     items = result.scalars().all()
-    return [await _enrich_item(i, db) for i in items]
+    enriched = []
+    for item in items:
+        item_resp = await _enrich_item(item, db)
+        # Hide reservation status from the wishlist owner — only guests should know
+        if item_resp.status == "reserved":
+            item_resp.status = "available"
+        enriched.append(item_resp)
+    return enriched
 
 
 @router.post("/wishlists/{wishlist_id}/items", response_model=ItemResponse, status_code=201)
