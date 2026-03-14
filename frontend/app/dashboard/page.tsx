@@ -8,12 +8,14 @@ import api, { Wishlist } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import WishlistCard from "@/components/wishlist/WishlistCard";
 import WishlistEmpty from "@/components/wishlist/WishlistEmpty";
+import GiftAdvisorModal from "@/components/wishlist/GiftAdvisorModal";
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user, loading, logout } = useAuth();
   const queryClient = useQueryClient();
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [advisorOpen, setAdvisorOpen] = useState(false);
 
   const handleDeleteAccount = async () => {
     if (!confirm("Удалить аккаунт? Все вишлисты будут удалены безвозвратно.")) return;
@@ -88,10 +90,16 @@ export default function DashboardPage() {
               </p>
             ) : null}
           </div>
-          <Link href="/wishlists/new" className="dash-create-btn">
-            <PlusIcon />
-            <span>Создать</span>
-          </Link>
+          <div className="dash-topbar-actions">
+            <button className="dash-ai-btn" onClick={() => setAdvisorOpen(true)}>
+              <span>✨</span>
+              <span>Спросить ИИ</span>
+            </button>
+            <Link href="/wishlists/new" className="dash-create-btn">
+              <PlusIcon />
+              <span>Создать</span>
+            </Link>
+          </div>
         </div>
 
         {/* Content */}
@@ -116,6 +124,8 @@ export default function DashboardPage() {
           <WishlistEmpty />
         )}
       </main>
+
+      <GiftAdvisorModal open={advisorOpen} onClose={() => setAdvisorOpen(false)} />
     </div>
   );
 }
