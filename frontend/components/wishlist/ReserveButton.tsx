@@ -52,7 +52,6 @@ export default function ReserveButton({ item, guestName, onRefresh, requireName 
   };
 
   if (item.status === "deleted") return null;
-  if (item.is_group_gift) return null;
 
   if (isMyReservation) {
     return (

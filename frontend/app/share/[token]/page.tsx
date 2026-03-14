@@ -189,7 +189,7 @@ export default function SharePage() {
                     contributionNotes={contribNotes[item.id]}
                     guestActions={
                       <div style={{ display: "flex", gap: 8 }}>
-                        {!item.is_group_gift && item.status !== "collected" && (
+                        {item.status !== "collected" && (
                           <ReserveButton item={item} guestName={guestName} onRefresh={handleRefresh} requireName={requireName} />
                         )}
                         {(item.is_group_gift || item.status === "collecting") && item.status !== "collected" && (

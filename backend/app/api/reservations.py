@@ -20,8 +20,6 @@ async def reserve_item(item_id: str, body: ReserveRequest, db: AsyncSession = De
         raise HTTPException(status_code=404, detail="Item not found")
     if item.status == "deleted":
         raise HTTPException(status_code=409, detail="Item has been removed")
-    if item.is_group_gift:
-        raise HTTPException(status_code=400, detail="Group gifts cannot be reserved individually")
     if item.status == "reserved":
         raise HTTPException(status_code=409, detail="Item already reserved")
 
