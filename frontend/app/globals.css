@@ -595,8 +595,16 @@ body {
 
 /* ─── Wishlist Card ───────────────────────────────────────── */
 
+.wcard-wrapper {
+  position: relative;
+  height: 100%;
+}
+
 .wcard {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 140px;
   position: relative;
   background: #111118;
   border: 1px solid #1a1a28;
@@ -633,6 +641,7 @@ body {
   display: flex;
   gap: 12px;
   margin-bottom: 14px;
+  flex: 1;
 }
 
 .wcard-icon {
@@ -725,10 +734,6 @@ body {
 }
 
 /* ─── Wishlist Card Delete Button ─────────────────────────── */
-
-.wcard-wrapper {
-  position: relative;
-}
 
 .wcard-delete-btn {
   position: absolute;
