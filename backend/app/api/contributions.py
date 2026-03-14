@@ -1,9 +1,10 @@
 import secrets
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.limiter import limiter
 from app.models.contribution import Contribution
 from app.models.item import Item
 from app.schemas.contribution import (
@@ -29,7 +30,8 @@ async def contribution_summary(item_id: str, db: AsyncSession = Depends(get_db))
 
 
 @router.post("/items/{item_id}/contributions", response_model=ContributionResponse, status_code=201)
-async def add_contribution(item_id: str, body: ContributionCreate, db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/minute")
+async def add_contribution(request: Request, item_id: str, body: ContributionCreate, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Item).where(Item.id == item_id).with_for_update())
     item = result.scalar_one_or_none()
     if not item:

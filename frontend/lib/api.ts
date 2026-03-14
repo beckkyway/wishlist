@@ -23,6 +23,7 @@ export interface Wishlist {
   title: string;
   description: string | null;
   occasion: string | null;
+  occasion_date: string | null;
   share_token: string;
   is_active: boolean;
   created_at: string;
@@ -47,6 +48,7 @@ export interface Item {
   is_group_gift: boolean;
   target_amount: number | null;
   order_index: number;
+  priority: "must_have" | "normal" | "dream";
   created_at: string;
   updated_at: string;
   contribution_summary: ContributionSummary | null;

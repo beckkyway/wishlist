@@ -55,6 +55,17 @@ export default function WishlistPage() {
   const visibleItems = items?.filter((i) => i.status !== "deleted") ?? [];
   const icon = wishlist?.occasion ? (OCCASION_EMOJI[wishlist.occasion] ?? "🎁") : "🎁";
 
+  const countdown = (() => {
+    if (!wishlist?.occasion_date) return null;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const target = new Date(wishlist.occasion_date); target.setHours(0, 0, 0, 0);
+    const diff = Math.round((target.getTime() - today.getTime()) / 86400000);
+    if (diff === 0) return "Сегодня!";
+    if (diff === 1) return "Завтра";
+    if (diff > 0) return `через ${diff} дн.`;
+    return null;
+  })();
+
   return (
     <RealtimeProvider wishlistId={id} onUpdate={handleRefresh}>
       <div className="dash-root">
@@ -66,9 +77,12 @@ export default function WishlistPage() {
               </button>
               <div className="wl-header-title">
                 <span className="wl-header-name">{wishlist?.title ?? "Вишлист"}</span>
-                {wishlist?.occasion && (
-                  <span className="wl-header-occasion">{icon} {wishlist.occasion}</span>
-                )}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  {wishlist?.occasion && (
+                    <span className="wl-header-occasion">{icon} {wishlist.occasion}</span>
+                  )}
+                  {countdown && <span className="wcard-countdown">{countdown}</span>}
+                </div>
               </div>
             </div>
             <button onClick={handleShare} className="wl-share-btn">

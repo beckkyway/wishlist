@@ -23,6 +23,8 @@ class Item(Base):
     is_group_gift: Mapped[bool] = mapped_column(Boolean, default=False)
     target_amount: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True)
     order_index: Mapped[int] = mapped_column(Integer, default=0)
+    # must_have | normal | dream
+    priority: Mapped[str] = mapped_column(String(20), default="normal")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -517,6 +517,28 @@ body {
   background: #111118;
 }
 
+.dash-delete-account {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  color: #374151;
+  transition: color 0.15s, background 0.15s;
+}
+.dash-delete-account:hover {
+  color: #ef4444;
+  background: rgba(239,68,68,0.08);
+}
+.dash-delete-account:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* Main */
 .dash-main {
   max-width: 860px;
@@ -716,6 +738,77 @@ body {
 .wcard-badge--inactive {
   background: #1a1a28;
   color: #4b5563;
+}
+
+.wcard-countdown {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(99,102,241,0.15);
+  color: #818cf8;
+}
+
+.icard-priority {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.icard-priority--must_have {
+  background: rgba(239,68,68,0.12);
+  color: #f87171;
+}
+.icard-priority--dream {
+  background: rgba(168,85,247,0.12);
+  color: #c084fc;
+}
+
+.mform-priority-row {
+  display: flex;
+  gap: 8px;
+}
+.mform-priority-btn {
+  flex: 1;
+  padding: 8px 6px;
+  border-radius: 8px;
+  border: 1.5px solid #2a2a3e;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.mform-priority-btn:hover {
+  border-color: #6366f1;
+  color: #e2e8f0;
+}
+.mform-priority-btn--active {
+  border-color: #6366f1;
+  background: rgba(99,102,241,0.12);
+  color: #a5b4fc;
+}
+
+.mform-upload-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1.5px dashed #2a2a3e;
+  color: #9ca3af;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.mform-upload-label:hover {
+  border-color: #6366f1;
+  color: #e2e8f0;
 }
 
 .wcard-arrow {

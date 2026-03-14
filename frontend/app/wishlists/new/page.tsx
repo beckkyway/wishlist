@@ -19,6 +19,7 @@ export default function NewWishlistPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [occasion, setOccasion] = useState("");
+  const [occasionDate, setOccasionDate] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -31,7 +32,12 @@ export default function NewWishlistPage() {
     if (!title.trim()) return;
     setLoading(true);
     try {
-      const { data } = await api.post<{ id: string }>("/wishlists", { title, description, occasion });
+      const { data } = await api.post<{ id: string }>("/wishlists", {
+        title,
+        description,
+        occasion,
+        occasion_date: occasionDate || null,
+      });
       router.push(`/wishlists/${data.id}`);
     } catch {
       toast.error("Не удалось создать вишлист");
@@ -114,6 +120,20 @@ export default function NewWishlistPage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Occasion date */}
+          <div className="nw-field">
+            <label className="nw-label">
+              Дата события <span className="nw-optional">необязательно</span>
+            </label>
+            <input
+              type="date"
+              className="nw-input"
+              value={occasionDate}
+              onChange={(e) => setOccasionDate(e.target.value)}
+              min={new Date().toISOString().split("T")[0]}
+            />
           </div>
 
           {/* Submit */}

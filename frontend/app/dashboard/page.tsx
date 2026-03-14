@@ -1,8 +1,9 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import api, { Wishlist } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import WishlistCard from "@/components/wishlist/WishlistCard";
@@ -12,6 +13,21 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user, loading, logout } = useAuth();
   const queryClient = useQueryClient();
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (!confirm("Удалить аккаунт? Все вишлисты будут удалены безвозвратно.")) return;
+    setDeletingAccount(true);
+    try {
+      await api.delete("/auth/me");
+      logout();
+      router.push("/");
+      toast.success("Аккаунт удалён");
+    } catch {
+      toast.error("Не удалось удалить аккаунт");
+      setDeletingAccount(false);
+    }
+  };
 
   useEffect(() => {
     if (!loading && !user) router.push("/login");
@@ -53,6 +69,9 @@ export default function DashboardPage() {
             <button className="dash-logout" onClick={logout}>
               <LogoutIcon />
               <span>Выйти</span>
+            </button>
+            <button className="dash-delete-account" onClick={handleDeleteAccount} disabled={deletingAccount} title="Удалить аккаунт">
+              <TrashIcon />
             </button>
           </div>
         </div>
@@ -119,6 +138,15 @@ function LogoutIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
     </svg>
   );
 }

@@ -13,6 +13,7 @@ class ItemCreate(BaseModel):
     is_group_gift: bool = False
     target_amount: Optional[float] = None
     order_index: int = 0
+    priority: str = "normal"
 
 
 class ItemUpdate(BaseModel):
@@ -25,6 +26,7 @@ class ItemUpdate(BaseModel):
     is_group_gift: Optional[bool] = None
     target_amount: Optional[float] = None
     order_index: Optional[int] = None
+    priority: Optional[str] = None
 
 
 class ContributionSummary(BaseModel):
@@ -45,6 +47,7 @@ class ItemResponse(BaseModel):
     is_group_gift: bool
     target_amount: Optional[float]
     order_index: int
+    priority: str
     created_at: datetime
     updated_at: datetime
     contribution_summary: Optional[ContributionSummary] = None

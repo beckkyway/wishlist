@@ -2,7 +2,9 @@ import secrets
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import String, DateTime, Boolean, ForeignKey, Text
+from datetime import date
+
+from sqlalchemy import String, DateTime, Boolean, ForeignKey, Text, Date
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -16,6 +18,7 @@ class Wishlist(Base):
     title: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     occasion: Mapped[str | None] = mapped_column(String, nullable=True)
+    occasion_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     share_token: Mapped[str] = mapped_column(String, unique=True, nullable=False, default=lambda: secrets.token_urlsafe(16))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

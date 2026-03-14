@@ -15,6 +15,19 @@ const OCCASION_EMOJI: Record<string, string> = {
   "Рождество": "🎅",
 };
 
+function getCountdown(occasionDate: string | null): string | null {
+  if (!occasionDate) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(occasionDate);
+  target.setHours(0, 0, 0, 0);
+  const diff = Math.round((target.getTime() - today.getTime()) / 86400000);
+  if (diff === 0) return "Сегодня!";
+  if (diff === 1) return "Завтра";
+  if (diff > 0) return `через ${diff} дн.`;
+  return null;
+}
+
 export default function WishlistCard({ wishlist, index = 0, onDelete }: { wishlist: Wishlist; index?: number; onDelete?: () => void }) {
   const [deleting, setDeleting] = useState(false);
   const date = new Date(wishlist.created_at).toLocaleDateString("ru-RU", {
@@ -23,6 +36,7 @@ export default function WishlistCard({ wishlist, index = 0, onDelete }: { wishli
   });
 
   const icon = wishlist.occasion ? (OCCASION_EMOJI[wishlist.occasion] ?? "✨") : "🎁";
+  const countdown = getCountdown(wishlist.occasion_date);
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -62,9 +76,14 @@ export default function WishlistCard({ wishlist, index = 0, onDelete }: { wishli
         </div>
         <div className="wcard-footer">
           <span className="wcard-date">{date}</span>
-          <span className={`wcard-badge ${wishlist.is_active ? "wcard-badge--active" : "wcard-badge--inactive"}`}>
-            {wishlist.is_active ? "Активный" : "Неактивный"}
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            {countdown && (
+              <span className="wcard-countdown">{countdown}</span>
+            )}
+            <span className={`wcard-badge ${wishlist.is_active ? "wcard-badge--active" : "wcard-badge--inactive"}`}>
+              {wishlist.is_active ? "Активный" : "Неактивный"}
+            </span>
+          </div>
         </div>
         <div className="wcard-arrow">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

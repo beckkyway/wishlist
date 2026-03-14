@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 from pydantic import BaseModel
 
@@ -7,12 +7,14 @@ class WishlistCreate(BaseModel):
     title: str
     description: Optional[str] = None
     occasion: Optional[str] = None
+    occasion_date: Optional[date] = None
 
 
 class WishlistUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     occasion: Optional[str] = None
+    occasion_date: Optional[date] = None
     is_active: Optional[bool] = None
 
 
@@ -22,6 +24,7 @@ class WishlistResponse(BaseModel):
     title: str
     description: Optional[str]
     occasion: Optional[str]
+    occasion_date: Optional[date]
     share_token: str
     is_active: bool
     created_at: datetime

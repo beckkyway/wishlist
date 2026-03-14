@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
@@ -44,6 +46,12 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
 @router.get("/me", response_model=UserResponse)
 async def me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.delete("/me", status_code=204)
+async def delete_me(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    current_user.deleted_at = datetime.now(timezone.utc)
+    await db.commit()
 
 
 @router.get("/google")

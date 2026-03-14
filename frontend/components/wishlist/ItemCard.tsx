@@ -69,9 +69,17 @@ export default function ItemCard({ item, isOwner, index = 0, onEdit, onRefresh, 
             <span className="icard-dot" style={{ background: status.dot }} />
             {status.label}
           </span>
-          {item.price && (
-            <span className="icard-price">{formatPrice(item.price, item.currency)}</span>
-          )}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            {item.priority === "must_have" && (
+              <span className="icard-priority icard-priority--must_have">🔴 Очень хочу</span>
+            )}
+            {item.priority === "dream" && (
+              <span className="icard-priority icard-priority--dream">✨ Мечта</span>
+            )}
+            {item.price && (
+              <span className="icard-price">{formatPrice(item.price, item.currency)}</span>
+            )}
+          </div>
         </div>
 
         {/* Title */}
