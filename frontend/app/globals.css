@@ -2354,6 +2354,77 @@ body {
   margin-bottom: 6px;
 }
 
+/* ─── Deleted contribution banner ─────────────────────────── */
+
+.deleted-contrib-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(234,179,8,0.12), rgba(245,158,11,0.08));
+  border: 1px solid rgba(234,179,8,0.3);
+  border-radius: 12px;
+  margin: 12px 16px 0;
+  font-size: 13px;
+  color: #fde68a;
+  line-height: 1.5;
+}
+
+.deleted-contrib-dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #a78028;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.deleted-contrib-dismiss:hover {
+  background: rgba(234,179,8,0.15);
+  color: #fde68a;
+}
+
+/* ─── Contribution notes list ──────────────────────────────── */
+
+.icard-contrib-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: rgba(99,102,241,0.06);
+  border: 1px solid rgba(99,102,241,0.12);
+  border-radius: 10px;
+}
+
+.icard-contrib-note {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.icard-contrib-name {
+  font-weight: 600;
+  color: #a5b4fc;
+}
+
+.icard-contrib-amount {
+  color: #6ee7b7;
+  font-weight: 500;
+}
+
+.icard-contrib-text {
+  color: #6b7280;
+  font-style: italic;
+}
+
 .landing-feature-desc {
   font-size: 13px;
   color: #4b5563;

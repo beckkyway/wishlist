@@ -6,6 +6,12 @@ import api, { Item } from "@/lib/api";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { formatPrice } from "@/lib/utils";
 
+interface ContribNote {
+  contributor_name: string;
+  amount: number;
+  note: string | null;
+}
+
 interface ItemCardProps {
   item: Item;
   isOwner?: boolean;
@@ -13,6 +19,7 @@ interface ItemCardProps {
   onEdit?: (item: Item) => void;
   onRefresh: () => void;
   guestActions?: React.ReactNode;
+  contributionNotes?: ContribNote[];
 }
 
 const STATUS_CONFIG = {
@@ -23,7 +30,7 @@ const STATUS_CONFIG = {
   deleted:    { label: "Снят",           dot: "#ef4444" },
 };
 
-export default function ItemCard({ item, isOwner, index = 0, onEdit, onRefresh, guestActions }: ItemCardProps) {
+export default function ItemCard({ item, isOwner, index = 0, onEdit, onRefresh, guestActions, contributionNotes }: ItemCardProps) {
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -88,6 +95,19 @@ export default function ItemCard({ item, isOwner, index = 0, onEdit, onRefresh, 
             current={item.contribution_summary?.total_collected ?? 0}
             target={item.target_amount}
           />
+        )}
+
+        {/* Contribution notes (visible to guests, not owner) */}
+        {contributionNotes && contributionNotes.length > 0 && (
+          <div className="icard-contrib-notes">
+            {contributionNotes.map((c, i) => (
+              <div key={i} className="icard-contrib-note">
+                <span className="icard-contrib-name">{c.contributor_name}</span>
+                <span className="icard-contrib-amount">{formatPrice(c.amount)}</span>
+                {c.note && <span className="icard-contrib-text">«{c.note}»</span>}
+              </div>
+            ))}
+          </div>
         )}
 
         {/* Guest actions */}

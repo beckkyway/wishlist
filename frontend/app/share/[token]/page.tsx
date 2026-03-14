@@ -1,22 +1,32 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import api, { Item, Wishlist } from "@/lib/api";
-import ProgressBar from "@/components/ui/ProgressBar";
 import Modal from "@/components/ui/Modal";
 import ReserveButton from "@/components/wishlist/ReserveButton";
 import ContributionModal from "@/components/wishlist/ContributionModal";
 import RealtimeProvider from "@/components/realtime/RealtimeProvider";
 import ItemCard from "@/components/wishlist/ItemCard";
 import { formatPrice } from "@/lib/utils";
-import Badge from "@/components/ui/Badge";
 
 const OCCASION_EMOJI: Record<string, string> = {
   "День рождения": "🎂", "Свадьба": "💍", "Новый год": "🎄",
   "Юбилей": "🥂", "Выпускной": "🎓", "Другое": "✨",
 };
+
+interface DeletedContrib {
+  item_id: string;
+  item_title: string;
+  your_amount: number;
+}
+
+interface ContribNote {
+  contributor_name: string;
+  amount: number;
+  note: string | null;
+}
 
 export default function SharePage() {
   const { token } = useParams<{ token: string }>();
@@ -29,6 +39,13 @@ export default function SharePage() {
   const [nameInput, setNameInput] = useState("");
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
   const [contribItem, setContribItem] = useState<Item | null>(null);
+  const [deletedContribs, setDeletedContribs] = useState<DeletedContrib[]>([]);
+  const [dismissedDeleted, setDismissedDeleted] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    const raw = localStorage.getItem("dismissed_deleted_contribs");
+    return new Set(raw ? JSON.parse(raw) : []);
+  });
+  const [contribNotes, setContribNotes] = useState<Record<string, ContribNote[]>>({});
 
   const { data: wishlist } = useQuery<Wishlist>({
     queryKey: ["share-wishlist", token],
@@ -45,9 +62,43 @@ export default function SharePage() {
     enabled: !!wishlist,
   });
 
+  // Check for deleted items where guest contributed
+  useEffect(() => {
+    if (!wishlist || typeof window === "undefined") return;
+    const checks = Object.keys(localStorage)
+      .filter((k) => k.startsWith("contrib_"))
+      .map((k) => ({ item_id: k.replace("contrib_", ""), contributor_token: localStorage.getItem(k)! }))
+      .filter((c) => c.contributor_token);
+
+    if (checks.length === 0) return;
+
+    api.post(`/share/${token}/check-deleted-contributions`, checks)
+      .then((r) => setDeletedContribs(r.data))
+      .catch(() => {});
+  }, [wishlist, token]);
+
+  // Fetch contribution notes for group gift items
+  useEffect(() => {
+    if (!items) return;
+    const groupItems = items.filter((i) => i.is_group_gift && i.status !== "deleted");
+    groupItems.forEach((item) => {
+      api.get(`/share/${token}/items/${item.id}/contributions`)
+        .then((r) => setContribNotes((prev) => ({ ...prev, [item.id]: r.data })))
+        .catch(() => {});
+    });
+  }, [items, token]);
+
   const handleRefresh = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["share-items", token] });
-  }, [queryClient, token]);
+    // Re-fetch contribution notes
+    if (items) {
+      items.filter((i) => i.is_group_gift && i.status !== "deleted").forEach((item) => {
+        api.get(`/share/${token}/items/${item.id}/contributions`)
+          .then((r) => setContribNotes((prev) => ({ ...prev, [item.id]: r.data })))
+          .catch(() => {});
+      });
+    }
+  }, [queryClient, token, items]);
 
   const requireName = (action: () => void) => {
     if (guestName) { action(); } else { setPendingAction(() => action); setNameModalOpen(true); }
@@ -62,8 +113,15 @@ export default function SharePage() {
     setPendingAction(null);
   };
 
+  const dismissDeletedBanner = (item_id: string) => {
+    const next = new Set(dismissedDeleted).add(item_id);
+    setDismissedDeleted(next);
+    localStorage.setItem("dismissed_deleted_contribs", JSON.stringify([...next]));
+  };
+
   const visibleItems = items?.filter((i) => i.status !== "deleted") ?? [];
   const icon = wishlist?.occasion ? (OCCASION_EMOJI[wishlist.occasion] ?? "🎁") : "🎁";
+  const visibleDeletedBanners = deletedContribs.filter((d) => !dismissedDeleted.has(d.item_id));
 
   if (!wishlist) {
     return <div className="dash-loading"><div className="dash-loading-spinner" /></div>;
@@ -72,6 +130,25 @@ export default function SharePage() {
   return (
     <RealtimeProvider wishlistId={wishlist.id} onUpdate={handleRefresh}>
       <div className="share-root">
+        {/* Deleted contribution banners */}
+        <AnimatePresence>
+          {visibleDeletedBanners.map((d) => (
+            <motion.div
+              key={d.item_id}
+              initial={{ opacity: 0, y: -16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              className="deleted-contrib-banner"
+            >
+              <span>
+                🗑️ Товар <strong>«{d.item_title}»</strong> был удалён владельцем.
+                Ваш вклад <strong>{formatPrice(d.your_amount)}</strong> аннулирован.
+              </span>
+              <button onClick={() => dismissDeletedBanner(d.item_id)} className="deleted-contrib-dismiss">✕</button>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
         {/* Hero */}
         <div className="share-hero">
           <div className="share-hero-glow" />
@@ -109,6 +186,7 @@ export default function SharePage() {
                     item={item}
                     index={i}
                     onRefresh={handleRefresh}
+                    contributionNotes={contribNotes[item.id]}
                     guestActions={
                       <div style={{ display: "flex", gap: 8 }}>
                         {!item.is_group_gift && item.status !== "collected" && (
