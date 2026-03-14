@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 interface GiftIdea {
   emoji: string;
@@ -26,7 +26,6 @@ const STEPS = [
       { label: "Новый год", emoji: "🎄" },
       { label: "Свадьба", emoji: "💍" },
       { label: "Выпускной", emoji: "🎓" },
-      { label: "9 мая", emoji: "🌹" },
       { label: "Без повода", emoji: "✨" },
     ],
   },
@@ -78,12 +77,17 @@ const STEPS = [
 ];
 
 export default function GiftAdvisorModal({ open, onClose }: Props) {
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [ideas, setIdeas] = useState<GiftIdea[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [wishlistName, setWishlistName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createStep, setCreateStep] = useState(false);
 
   const current = STEPS[step];
 
@@ -96,7 +100,47 @@ export default function GiftAdvisorModal({ open, onClose }: Props) {
       setLoading(false);
       setError("");
       setDone(false);
+      setSelected(new Set());
+      setWishlistName("");
+      setCreating(false);
+      setCreateStep(false);
     }, 300);
+  }
+
+  function toggleIdea(i: number) {
+    const next = new Set(selected);
+    if (next.has(i)) next.delete(i); else next.add(i);
+    setSelected(next);
+  }
+
+  async function handleCreateWishlist() {
+    if (!wishlistName.trim()) return;
+    setCreating(true);
+    try {
+      const token = localStorage.getItem("jwt_token");
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const wlRes = await fetch(`${base}/wishlists`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ title: wishlistName.trim(), description: "", occasion: "", occasion_date: null }),
+      });
+      if (!wlRes.ok) throw new Error("Не удалось создать вишлист");
+      const wl = await wlRes.json();
+      const chosen = ideas.filter((_, i) => selected.has(i));
+      await Promise.all(chosen.map((idea) =>
+        fetch(`${base}/wishlists/${wl.id}/items`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ title: idea.title, description: `${idea.description} (${idea.price_hint})`, url: null, price: null, image_url: null, is_group_gift: false, target_amount: null, priority: "normal" }),
+        })
+      ));
+      handleClose();
+      router.push(`/wishlists/${wl.id}`);
+    } catch {
+      setCreating(false);
+    }
   }
 
   function toggleOption(label: string) {
@@ -166,6 +210,9 @@ export default function GiftAdvisorModal({ open, onClose }: Props) {
     setIdeas([]);
     setDone(false);
     setError("");
+    setSelected(new Set());
+    setWishlistName("");
+    setCreateStep(false);
   }
 
   return (
@@ -221,20 +268,32 @@ export default function GiftAdvisorModal({ open, onClose }: Props) {
               )}
 
               {/* Results */}
-              {!loading && !error && done && (
+              {!loading && !error && done && !createStep && (
                 <div className="gai-results">
                   <div className="gai-results-header">
                     <p className="gai-results-title">Вот что я нашёл для тебя</p>
-                    <p className="gai-results-sub">{ideas.length} идей подарков</p>
+                    <p className="gai-results-sub">Отметь идеи, чтобы добавить в вишлист</p>
                   </div>
                   <div className="gai-ideas-grid">
                     {ideas.map((idea, i) => (
-                      <div key={i} className="gai-idea-card">
+                      <div
+                        key={i}
+                        className={`gai-idea-card ${selected.has(i) ? "gai-idea-card--selected" : ""}`}
+                        onClick={() => toggleIdea(i)}
+                        style={{ cursor: "pointer" }}
+                      >
                         <span className="gai-idea-emoji">{idea.emoji}</span>
                         <div className="gai-idea-content">
                           <p className="gai-idea-title">{idea.title}</p>
                           <p className="gai-idea-desc">{idea.description}</p>
                           <span className="gai-idea-price">{idea.price_hint}</span>
+                        </div>
+                        <div className={`gai-idea-check ${selected.has(i) ? "gai-idea-check--on" : ""}`}>
+                          {selected.has(i) && (
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                              <path d="M20 6L9 17l-5-5" />
+                            </svg>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -243,8 +302,46 @@ export default function GiftAdvisorModal({ open, onClose }: Props) {
                     <button className="gai-restart-btn" onClick={handleRestart}>
                       Подобрать ещё раз
                     </button>
-                    <button className="gai-close-btn" onClick={handleClose}>
-                      Закрыть
+                    {selected.size > 0 ? (
+                      <button className="gai-add-btn" onClick={() => setCreateStep(true)}>
+                        Создать вишлист ({selected.size})
+                      </button>
+                    ) : (
+                      <button className="gai-close-btn" onClick={handleClose}>
+                        Закрыть
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Create wishlist step */}
+              {!loading && !error && done && createStep && (
+                <div className="gai-results">
+                  <div className="gai-results-header">
+                    <p className="gai-results-title">Назови вишлист</p>
+                    <p className="gai-results-sub">Выбрано идей: {selected.size}</p>
+                  </div>
+                  <div className="gai-create-form">
+                    <input
+                      className="gai-name-input"
+                      value={wishlistName}
+                      onChange={(e) => setWishlistName(e.target.value)}
+                      placeholder="Мой вишлист на день рождения"
+                      autoFocus
+                      onKeyDown={(e) => e.key === "Enter" && handleCreateWishlist()}
+                    />
+                  </div>
+                  <div className="gai-results-footer">
+                    <button className="gai-restart-btn" onClick={() => setCreateStep(false)}>
+                      ← Назад
+                    </button>
+                    <button
+                      className="gai-add-btn"
+                      disabled={!wishlistName.trim() || creating}
+                      onClick={handleCreateWishlist}
+                    >
+                      {creating ? "Создаём..." : "Создать ✨"}
                     </button>
                   </div>
                 </div>

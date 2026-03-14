@@ -857,6 +857,35 @@ body {
 
 /* ─── Wishlist Card Delete Button ─────────────────────────── */
 
+.wcard-manage-btn {
+  position: absolute;
+  top: 10px;
+  right: 44px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(99,102,241,0.08);
+  border: 1px solid rgba(99,102,241,0.15);
+  color: #6366f1;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, border-color 0.15s;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.wcard-wrapper:hover .wcard-manage-btn {
+  opacity: 1;
+}
+
+.wcard-manage-btn:hover {
+  background: rgba(99,102,241,0.18);
+  border-color: rgba(99,102,241,0.35);
+}
+
 .wcard-delete-btn {
   position: absolute;
   top: 10px;
@@ -1222,6 +1251,96 @@ body {
 .nw-submit:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.nw-date-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.nw-date-clear {
+  font-size: 12px;
+  color: rgba(148,163,184,0.7);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: color 0.15s;
+}
+
+.nw-date-clear:hover {
+  color: #ef4444;
+}
+
+.nw-date-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(30,30,50,0.4);
+  border: 1.5px dashed rgba(99,102,241,0.3);
+  border-radius: 12px;
+  color: rgba(148,163,184,0.8);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.nw-date-add-btn:hover {
+  border-color: rgba(99,102,241,0.6);
+  color: #6366f1;
+  background: rgba(99,102,241,0.05);
+}
+
+.nw-datepicker {
+  display: flex;
+  gap: 10px;
+}
+
+.nw-datepicker-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nw-datepicker-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(148,163,184,0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.nw-datepicker-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(30,30,50,0.5) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
+  border: 1.5px solid rgba(99,102,241,0.2);
+  border-radius: 10px;
+  padding: 10px 28px 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+}
+
+.nw-datepicker-select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+
+.nw-datepicker-select option {
+  background: #1a1a2e;
+  color: #e2e8f0;
 }
 
 /* ─── Wishlist Header ─────────────────────────────────────── */
@@ -2337,6 +2456,81 @@ body {
 
 .gai-close-btn:hover {
   opacity: 0.9;
+}
+
+.gai-idea-card--selected {
+  border-color: rgba(99,102,241,0.5) !important;
+  background: rgba(99,102,241,0.06) !important;
+}
+
+.gai-idea-check {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 1.5px solid #2d2d40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+  align-self: center;
+}
+
+.gai-idea-check--on {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #fff;
+}
+
+.gai-add-btn {
+  flex: 1;
+  padding: 10px;
+  background: linear-gradient(135deg, #6366f1, #7c3aed);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  box-shadow: 0 2px 12px rgba(99,102,241,0.25);
+}
+
+.gai-add-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.gai-add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.gai-create-form {
+  padding: 8px 0 12px;
+}
+
+.gai-name-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(30,30,50,0.6);
+  border: 1.5px solid rgba(99,102,241,0.2);
+  border-radius: 12px;
+  color: #e2e8f0;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.gai-name-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+
+.gai-name-input::placeholder {
+  color: rgba(148,163,184,0.4);
 }
 
 /* ─── Landing Page ─────────────────────────────────────────── */

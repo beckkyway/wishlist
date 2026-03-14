@@ -18,7 +18,6 @@ type Priority = "must_have" | "normal" | "dream";
 const PRIORITIES: { value: Priority; label: string }[] = [
   { value: "must_have", label: "🔴 Очень хочу" },
   { value: "normal",    label: "Обычное" },
-  { value: "dream",     label: "✨ Мечта" },
 ];
 
 export default function ItemForm({ open, onClose, wishlistId, editItem, onSaved }: ItemFormProps) {

@@ -5,6 +5,69 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import api from "@/lib/api";
 
+const MONTHS = [
+  "Январь","Февраль","Март","Апрель","Май","Июнь",
+  "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь",
+];
+
+function DatePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const today = new Date();
+  const initYear = value ? parseInt(value.split("-")[0]) : today.getFullYear();
+  const initMonth = value ? parseInt(value.split("-")[1]) - 1 : today.getMonth();
+  const initDay = value ? parseInt(value.split("-")[2]) : today.getDate();
+
+  const [year, setYear] = useState(initYear);
+  const [month, setMonth] = useState(initMonth);
+  const [day, setDay] = useState(initDay);
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const years = Array.from({ length: 5 }, (_, i) => today.getFullYear() + i);
+
+  const update = (y: number, m: number, d: number) => {
+    const maxDay = new Date(y, m + 1, 0).getDate();
+    const safeDay = Math.min(d, maxDay);
+    const str = `${y}-${String(m + 1).padStart(2, "0")}-${String(safeDay).padStart(2, "0")}`;
+    onChange(str);
+    return safeDay;
+  };
+
+  return (
+    <div className="nw-datepicker">
+      <div className="nw-datepicker-field">
+        <label className="nw-datepicker-label">День</label>
+        <select
+          className="nw-datepicker-select"
+          value={day}
+          onChange={(e) => { const d = +e.target.value; setDay(d); update(year, month, d); }}
+        >
+          {days.map((d) => <option key={d} value={d}>{d}</option>)}
+        </select>
+      </div>
+      <div className="nw-datepicker-field" style={{ flex: 2 }}>
+        <label className="nw-datepicker-label">Месяц</label>
+        <select
+          className="nw-datepicker-select"
+          value={month}
+          onChange={(e) => { const m = +e.target.value; setMonth(m); const safe = update(year, m, day); setDay(safe); }}
+        >
+          {MONTHS.map((name, i) => <option key={i} value={i}>{name}</option>)}
+        </select>
+      </div>
+      <div className="nw-datepicker-field">
+        <label className="nw-datepicker-label">Год</label>
+        <select
+          className="nw-datepicker-select"
+          value={year}
+          onChange={(e) => { const y = +e.target.value; setYear(y); update(y, month, day); }}
+        >
+          {years.map((y) => <option key={y} value={y}>{y}</option>)}
+        </select>
+      </div>
+    </div>
+  );
+}
+
 const OCCASIONS = [
   { label: "День рождения", emoji: "🎂" },
   { label: "Свадьба", emoji: "💍" },
@@ -124,16 +187,28 @@ export default function NewWishlistPage() {
 
           {/* Occasion date */}
           <div className="nw-field">
-            <label className="nw-label">
-              Дата события <span className="nw-optional">необязательно</span>
-            </label>
-            <input
-              type="date"
-              className="nw-input"
-              value={occasionDate}
-              onChange={(e) => setOccasionDate(e.target.value)}
-              min={new Date().toISOString().split("T")[0]}
-            />
+            <div className="nw-date-header">
+              <label className="nw-label" style={{ marginBottom: 0 }}>
+                Дата события <span className="nw-optional">необязательно</span>
+              </label>
+              {occasionDate && (
+                <button type="button" className="nw-date-clear" onClick={() => setOccasionDate("")}>
+                  Очистить
+                </button>
+              )}
+            </div>
+            {occasionDate ? (
+              <DatePicker value={occasionDate} onChange={setOccasionDate} />
+            ) : (
+              <button
+                type="button"
+                className="nw-date-add-btn"
+                onClick={() => setOccasionDate(new Date().toISOString().split("T")[0])}
+              >
+                <CalendarIcon />
+                <span>Выбрать дату</span>
+              </button>
+            )}
           </div>
 
           {/* Submit */}
@@ -150,6 +225,16 @@ export default function NewWishlistPage() {
         </form>
       </main>
     </div>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
   );
 }
 

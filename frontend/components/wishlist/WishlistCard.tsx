@@ -60,7 +60,7 @@ export default function WishlistCard({ wishlist, index = 0, onDelete }: { wishli
       transition={{ duration: 0.25, delay: index * 0.06 }}
       className="wcard-wrapper"
     >
-      <Link href={`/wishlists/${wishlist.id}`} className="wcard">
+      <Link href={`/share/${wishlist.share_token}`} className="wcard">
         <div className="wcard-accent-line" />
         <div className="wcard-body">
           <div className="wcard-icon">{icon}</div>
@@ -91,6 +91,14 @@ export default function WishlistCard({ wishlist, index = 0, onDelete }: { wishli
           </svg>
         </div>
       </Link>
+      <Link
+        href={`/wishlists/${wishlist.id}`}
+        className="wcard-manage-btn"
+        onClick={(e) => e.stopPropagation()}
+        title="Управлять вишлистом"
+      >
+        <EditIcon />
+      </Link>
       {onDelete && (
         <button
           className="wcard-delete-btn"
@@ -102,6 +110,15 @@ export default function WishlistCard({ wishlist, index = 0, onDelete }: { wishli
         </button>
       )}
     </motion.div>
+  );
+}
+
+function EditIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
   );
 }
 
