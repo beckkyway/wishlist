@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from pydantic import BaseModel
 from typing import Optional
 
@@ -54,7 +55,8 @@ async def get_public_items(
 
     result = await db.execute(
         select(Item)
-        .where(Item.wishlist_id == wishlist.id)
+        .options(selectinload(Item.reservation))
+        .where(Item.wishlist_id == wishlist.id, Item.status != "deleted")
         .order_by(Item.order_index, Item.created_at)
     )
     items = result.scalars().all()

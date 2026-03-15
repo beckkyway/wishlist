@@ -2,7 +2,6 @@ import asyncio
 from logging.config import fileConfig
 
 from sqlalchemy import pool
-from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
@@ -20,15 +19,12 @@ target_metadata = Base.metadata
 
 def get_url():
     from app.core.config import settings
-    url = settings.DATABASE_URL
-    separator = "&" if "?" in url else "?"
-    return f"{url}{separator}prepared_statement_cache_size=0"
+    return settings.DATABASE_URL
 
 
 def run_migrations_offline() -> None:
-    url = get_url()
     context.configure(
-        url=url,
+        url=get_url(),
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -44,12 +40,13 @@ def do_run_migrations(connection):
 
 
 async def run_async_migrations() -> None:
-    cfg = config.get_section(config.config_ini_section, {})
-    cfg["sqlalchemy.url"] = get_url()
-    connectable = async_engine_from_config(
-        cfg,
-        prefix="sqlalchemy.",
+    from app.core.config import settings
+    from sqlalchemy.ext.asyncio import create_async_engine
+
+    connectable = create_async_engine(
+        settings.DATABASE_URL,
         poolclass=pool.NullPool,
+        prepared_statement_cache_size=0,
         connect_args={"statement_cache_size": 0},
     )
     async with connectable.connect() as connection:

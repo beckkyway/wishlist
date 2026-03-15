@@ -3,17 +3,13 @@ from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import settings
 
-# Supabase uses pgbouncer in transaction mode — disable prepared statement caches
-# at both SQLAlchemy dialect level (URL param) and asyncpg level (connect_args)
-_db_url = settings.DATABASE_URL
-_separator = "&" if "?" in _db_url else "?"
-_db_url = f"{_db_url}{_separator}prepared_statement_cache_size=0"
+_kw: dict = {"echo": False}
+if settings.DATABASE_URL.startswith("postgresql+asyncpg"):
+    # Supabase / pgbouncer transaction mode requires disabling prepared statement caches
+    _kw["prepared_statement_cache_size"] = 0
+    _kw["connect_args"] = {"statement_cache_size": 0}
 
-engine = create_async_engine(
-    _db_url,
-    echo=False,
-    connect_args={"statement_cache_size": 0},
-)
+engine = create_async_engine(settings.DATABASE_URL, **_kw)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 

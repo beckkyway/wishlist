@@ -44,7 +44,7 @@ async def list_items(
     await _check_wishlist_owner(wishlist_id, current_user.id, db)
     result = await db.execute(
         select(Item)
-        .where(Item.wishlist_id == wishlist_id)
+        .where(Item.wishlist_id == wishlist_id, Item.status != "deleted")
         .order_by(Item.order_index, Item.created_at)
     )
     items = result.scalars().all()
