@@ -18,9 +18,9 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await api.post<{ access_token: string }>("/auth/register", { name, email, password });
-      localStorage.setItem("jwt_token", data.access_token);
-      router.push("/dashboard");
+      await api.post<{ access_token: string }>("/auth/register", { name, email, password });
+      toast.success("Аккаунт создан! Теперь войдите.");
+      router.push("/login");
     } catch (err: unknown) {
       toast.error(getApiError(err, "Ошибка регистрации"));
     } finally {

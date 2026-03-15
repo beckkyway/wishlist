@@ -30,6 +30,14 @@ function getCountdown(occasionDate: string | null): string | null {
 
 export default function WishlistCard({ wishlist, index = 0, onDelete }: { wishlist: Wishlist; index?: number; onDelete?: () => void }) {
   const [deleting, setDeleting] = useState(false);
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = `${window.location.origin}/share/${wishlist.share_token}`;
+    await navigator.clipboard.writeText(url);
+    toast.success("Ссылка скопирована");
+  };
   const date = new Date(wishlist.created_at).toLocaleDateString("ru-RU", {
     day: "numeric",
     month: "short",
@@ -91,6 +99,13 @@ export default function WishlistCard({ wishlist, index = 0, onDelete }: { wishli
           </svg>
         </div>
       </Link>
+      <button
+        className="wcard-copy-btn"
+        onClick={handleCopy}
+        title="Скопировать ссылку"
+      >
+        <CopyIcon />
+      </button>
       <Link
         href={`/wishlists/${wishlist.id}`}
         className="wcard-manage-btn"
@@ -110,6 +125,15 @@ export default function WishlistCard({ wishlist, index = 0, onDelete }: { wishli
         </button>
       )}
     </motion.div>
+  );
+}
+
+function CopyIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="9" y="9" width="13" height="13" rx="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
   );
 }
 

@@ -1,7 +1,8 @@
 "use client";
 import { useState, useCallback, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
 import api, { Item, Wishlist } from "@/lib/api";
 import Modal from "@/components/ui/Modal";
@@ -31,6 +32,8 @@ interface ContribNote {
 export default function SharePage() {
   const { token } = useParams<{ token: string }>();
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const { user } = useAuth();
 
   const [guestName, setGuestName] = useState<string>(() =>
     typeof window !== "undefined" ? localStorage.getItem("guest_name") ?? "" : ""
@@ -87,6 +90,12 @@ export default function SharePage() {
         .catch(() => {});
     });
   }, [items, token]);
+
+  useEffect(() => {
+    if (user && wishlist && user.id === wishlist.user_id) {
+      router.replace(`/wishlists/${wishlist.id}`);
+    }
+  }, [user, wishlist, router]);
 
   const handleRefresh = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["share-items", token] });
